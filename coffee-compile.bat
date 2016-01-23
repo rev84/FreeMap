@@ -1,0 +1,1 @@
+coffee -wcb --join engine.js -o js coffee
