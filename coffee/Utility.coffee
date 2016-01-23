@@ -5,7 +5,7 @@ class Utility
     for yy in [0...y]
       yAry[yy] = val
     for xx in [0...x]
-      res[xx] = yAry.copy()
+      res[xx] = yAry.concat()
     res
 
   @militime:(get_as_float = false)->
@@ -14,6 +14,9 @@ class Utility
   @rand:(min, max)->
     Math.round()
     Math.floor(Math.random() * (max - min + 1)) + min
+
+  @count:(object)->
+    Object.keys(object).length
 
 Array::shuffle = ()->
   n = @length
@@ -36,3 +39,4 @@ Array::copy = ()->
       res2.push v2
     res.push res2
   res
+

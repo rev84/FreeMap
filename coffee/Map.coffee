@@ -6,7 +6,10 @@ class Map
   # 街の数
   @TOWN_NUM = 15
   # 街の最低距離
-  @TOWN_DISTANCE_MIN = 200
+  @TOWN_DISTANCE_MIN = 40
+
+  # 陸地面積の割合
+  @LAND_RATE = 0.02
 
 
   # 街
@@ -14,6 +17,22 @@ class Map
 
   @init:->
 
+
+  @drawLand:->
+    start = Utility.militime(true)
+    $('#map').css({
+      width : @MAP_X+'px'
+      height : @MAP_Y+'px'
+    })
+    posAry = @generateLand()
+    for [x, y] in posAry
+      img = $('<img>').attr('src', './img/land.png').addClass('town').css({
+        left: ''+x+'px'
+        top : ''+y+'px'
+      })
+      $('#map').append img
+    end = Utility.militime(true)
+    console.log(""+(end - start)+" sec")
 
   @drawTown:->
     start = Utility.militime(true)
@@ -31,6 +50,31 @@ class Map
     end = Utility.militime(true)
     console.log(""+(end - start)+" sec")
 
+  # 陸地を決める
+  @generateLand:->
+    # 陸地は何マスになるか
+    landNum = Math.floor @MAP_X * @MAP_Y * @LAND_RATE
+
+    # ルンバを10台走らせて指定面積になるまでやる
+    lumbaScale = 3 # ルンバの大きさ
+    landHash = {}
+    lumba = []
+    lumba.push [Math.floor(@MAP_X/2), Math.floor(@MAP_Y/2)] for t in [0...10]
+    while Utility.count(landHash) < landNum
+      for lu in [0...lumba.length]
+        newX = lumba[lu][0] + Utility.rand(-1, 1)
+        newY = lumba[lu][1] + Utility.rand(-1, 1)
+        continue unless 0 <= newX < @MAP_X-(lumbaScale-1) and 0 <= newY < @MAP_Y-(lumbaScale-1)
+        lumba[lu] = [newX, newY]
+        for xPlus in [0...lumbaScale]
+          for yPlus in [0...lumbaScale]
+            landHash[''+(newX+xPlus)+'.'+(newY+yPlus)] = true
+    # 精算
+    res = []
+    for key, value of landHash
+      [x, y] = key.split('.')
+      res.push [Number(x), Number(y)]
+    res
 
 
   # 街の数、最低距離を守りながら、座標を決定
