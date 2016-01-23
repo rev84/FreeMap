@@ -14,7 +14,7 @@ Map = (function() {
 
   Map.TOWN_NUM = 15;
 
-  Map.TOWN_DISTANCE_MIN = 100;
+  Map.TOWN_DISTANCE_MIN = 200;
 
   Map.towns = [];
 
@@ -41,36 +41,75 @@ Map = (function() {
   };
 
   Map.generatePos = function() {
-    var canPut, j, k, l, m, mapAry, o, pickX, pickY, posAry, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, t, x, y;
-    mapAry = Utility.generateArray(this.MAP_X, this.MAP_Y, true);
+    var checkPut, j, k, posAry, randomComplete, randomPut, ref, res, rt, t;
     posAry = [];
-    for (t = j = 0, ref = this.TOWN_NUM; 0 <= ref ? j < ref : j > ref; t = 0 <= ref ? ++j : --j) {
-      canPut = [];
-      for (x = k = 0, ref1 = mapAry.length; 0 <= ref1 ? k < ref1 : k > ref1; x = 0 <= ref1 ? ++k : --k) {
-        for (y = l = 0, ref2 = mapAry[x].length; 0 <= ref2 ? l < ref2 : l > ref2; y = 0 <= ref2 ? ++l : --l) {
-          if (mapAry[x][y]) {
-            canPut.push([x, y]);
+    randomPut = (function(_this) {
+      return function() {
+        var flag, j, len, pickX, pickY, ref, ref1, x, y;
+        ref = [Utility.rand(0, _this.MAP_X - 1), Utility.rand(0, _this.MAP_Y - 1)], pickX = ref[0], pickY = ref[1];
+        flag = false;
+        for (j = 0, len = posAry.length; j < len; j++) {
+          ref1 = posAry[j], x = ref1[0], y = ref1[1];
+          if (Math.pow(pickX - x, 2) + Math.pow(pickY - y, 2) < Math.pow(_this.TOWN_DISTANCE_MIN, 2)) {
+            return false;
           }
         }
-      }
-      if (canPut.length === 0) {
-        return false;
-      }
-      ref3 = canPut.shuffle().pop(), pickX = ref3[0], pickY = ref3[1];
-      posAry.push([pickX, pickY]);
-      for (x = m = ref4 = pickX - this.TOWN_DISTANCE_MIN, ref5 = pickX + this.TOWN_DISTANCE_MIN; ref4 <= ref5 ? m <= ref5 : m >= ref5; x = ref4 <= ref5 ? ++m : --m) {
-        if (!((0 <= x && x < this.MAP_X))) {
+        return [pickX, pickY];
+      };
+    })(this);
+    checkPut = (function(_this) {
+      return function() {
+        var canPut, j, k, l, len, m, mapAry, o, posX, posY, ref, ref1, ref2, ref3, ref4, ref5, ref6, x, y;
+        mapAry = Utility.generateArray(_this.MAP_X, _this.MAP_Y, true);
+        for (j = 0, len = posAry.length; j < len; j++) {
+          ref = posAry[j], posX = ref[0], posY = ref[1];
+          for (x = k = ref1 = posX - _this.TOWN_DISTANCE_MIN, ref2 = posX + _this.TOWN_DISTANCE_MIN; ref1 <= ref2 ? k <= ref2 : k >= ref2; x = ref1 <= ref2 ? ++k : --k) {
+            if (!((0 <= x && x < _this.MAP_X))) {
+              continue;
+            }
+            for (y = l = ref3 = posY - _this.TOWN_DISTANCE_MIN, ref4 = posY + _this.TOWN_DISTANCE_MIN; ref3 <= ref4 ? l < ref4 : l > ref4; y = ref3 <= ref4 ? ++l : --l) {
+              if (!((0 <= y && y < _this.MAP_Y))) {
+                continue;
+              }
+              if (Math.pow(posX - x, 2) + Math.pow(posY - y, 2) < Math.pow(_this.TOWN_DISTANCE_MIN, 2)) {
+                mapAry[x][y] = false;
+              }
+            }
+          }
+        }
+        canPut = [];
+        for (x = m = 0, ref5 = mapAry.length; 0 <= ref5 ? m < ref5 : m > ref5; x = 0 <= ref5 ? ++m : --m) {
+          for (y = o = 0, ref6 = mapAry[x].length; 0 <= ref6 ? o < ref6 : o > ref6; y = 0 <= ref6 ? ++o : --o) {
+            if (mapAry[x][y]) {
+              canPut.push([x, y]);
+            }
+          }
+        }
+        if (canPut.length === 0) {
+          return false;
+        }
+        return canPut.shuffle().pop();
+      };
+    })(this);
+    for (t = j = 0, ref = this.TOWN_NUM; 0 <= ref ? j < ref : j > ref; t = 0 <= ref ? ++j : --j) {
+      randomComplete = false;
+      for (rt = k = 0; k < 100; rt = ++k) {
+        res = randomPut();
+        if (res === false) {
           continue;
         }
-        for (y = o = ref6 = pickY - this.TOWN_DISTANCE_MIN, ref7 = pickY + this.TOWN_DISTANCE_MIN; ref6 <= ref7 ? o < ref7 : o > ref7; y = ref6 <= ref7 ? ++o : --o) {
-          if (!((0 <= y && y < this.MAP_Y))) {
-            continue;
-          }
-          if (Math.pow(pickX - x, 2) + Math.pow(pickY - y, 2) < Math.pow(this.TOWN_DISTANCE_MIN, 2)) {
-            mapAry[x][y] = false;
-          }
-        }
+        posAry.push(res);
+        randomComplete = true;
+        break;
       }
+      if (randomComplete) {
+        continue;
+      }
+      res = checkPut();
+      if (res === false) {
+        return false;
+      }
+      posAry.push(res);
     }
     return posAry;
   };
@@ -82,9 +121,9 @@ Map = (function() {
 Town = (function() {
   Town.prototype.name = null;
 
-  function Town(posX, posY) {
-    this.posX = posX;
-    this.posY = posY;
+  function Town(posX1, posY1) {
+    this.posX = posX1;
+    this.posY = posY1;
   }
 
   Town.generateName = function() {};
