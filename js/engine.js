@@ -6,40 +6,39 @@ $().ready(function() {});
 Map = (function() {
   function Map() {}
 
-  Map.MAP_X = 1000;
+  Map.MAP_X = 500;
 
-  Map.MAP_Y = 800;
+  Map.MAP_Y = 400;
 
-  Map.TOWN_NUM = 15;
+  Map.TOWN_NUM = 10;
 
   Map.TOWN_DISTANCE_MIN = 40;
 
-  Map.LAND_RATE = 0.7;
+  Map.LAND_RATE = 0.5;
 
   Map.towns = [];
 
   Map.init = function() {};
 
   Map.drawLand = function() {
-    var end, j, len, posAry, ref, start, x, y;
-    start = Utility.militime(true);
+    var j, len, posAry, ref, results, x, y;
     $('#land').attr({
       width: this.MAP_X + 'px',
       height: this.MAP_Y + 'px'
     });
     posAry = this.generateLand();
+    results = [];
     for (j = 0, len = posAry.length; j < len; j++) {
       ref = posAry[j], x = ref[0], y = ref[1];
-      $('#land').drawRect({
+      results.push($('#land').drawRect({
         strokeStyle: '#7cfc00',
         x: x,
         y: y,
         width: 1,
         height: 1
-      });
+      }));
     }
-    end = Utility.militime(true);
-    return console.log("" + (end - start) + " sec");
+    return results;
   };
 
   Map.drawTown = function() {
@@ -63,36 +62,90 @@ Map = (function() {
   };
 
   Map.generateLand = function() {
-    var j, k, key, l, landHash, landNum, lu, lumba, lumbaNum, lumbaScale, m, newX, newY, ref, ref1, ref2, ref3, ref4, res, t, value, x, xPlus, y, yPlus;
+    var _, i, isOver, j, k, key, l, landHash, landNum, len, len1, ln, lu, lumba, lumbaNum, lumbaScale, m, minX, minY, newMapPosArray, newX, newY, o, p, parts, pos, q, r, ref, ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, res, start, t, tempLandHash, tempLandNum, tempPosStr, value, x, xPlus, y, yPlus;
+    start = Utility.militime(true);
     landNum = Math.floor(this.MAP_X * this.MAP_Y * this.LAND_RATE);
-    lumbaScale = 5;
-    lumbaNum = 100;
-    landHash = {};
-    lumba = [];
-    for (t = j = 0, ref = lumbaNum; 0 <= ref ? j < ref : j > ref; t = 0 <= ref ? ++j : --j) {
-      lumba.push([Math.floor(this.MAP_X / 2), Math.floor(this.MAP_Y / 2)]);
-    }
-    while (Utility.count(landHash) < landNum) {
-      for (lu = k = 0, ref1 = lumba.length; 0 <= ref1 ? k < ref1 : k > ref1; lu = 0 <= ref1 ? ++k : --k) {
-        newX = lumba[lu][0] + Utility.rand(-1, 1);
-        newY = lumba[lu][1] + Utility.rand(-1, 1);
-        if (!((0 <= newX && newX < this.MAP_X - (lumbaScale - 1)) && (0 <= newY && newY < this.MAP_Y - (lumbaScale - 1)))) {
-          continue;
-        }
-        lumba[lu] = [newX, newY];
-        for (xPlus = l = 0, ref2 = lumbaScale; 0 <= ref2 ? l < ref2 : l > ref2; xPlus = 0 <= ref2 ? ++l : --l) {
-          for (yPlus = m = 0, ref3 = lumbaScale; 0 <= ref3 ? m < ref3 : m > ref3; yPlus = 0 <= ref3 ? ++m : --m) {
-            landHash['' + (newX + xPlus) + '.' + (newY + yPlus)] = true;
+    parts = [];
+    for (t = j = 0; j < 5; t = ++j) {
+      tempLandNum = Math.floor(landNum / 10);
+      lumbaScale = 5;
+      lumbaNum = 5;
+      tempLandHash = {};
+      lumba = [];
+      for (ln = k = 0, ref = lumbaNum; 0 <= ref ? k < ref : k > ref; ln = 0 <= ref ? ++k : --k) {
+        lumba.push([Math.floor(this.MAP_X / 2), Math.floor(this.MAP_Y / 2)]);
+      }
+      while (Utility.count(tempLandHash) < tempLandNum) {
+        for (lu = l = 0, ref1 = lumba.length; 0 <= ref1 ? l < ref1 : l > ref1; lu = 0 <= ref1 ? ++l : --l) {
+          newX = lumba[lu][0] + Utility.rand(-1, 1);
+          newY = lumba[lu][1] + Utility.rand(-1, 1);
+          if (!((0 <= newX && newX < tempLandNum - (lumbaScale - 1)) && (0 <= newY && newY < tempLandNum - (lumbaScale - 1)))) {
+            continue;
+          }
+          lumba[lu] = [newX, newY];
+          for (xPlus = m = 0, ref2 = lumbaScale; 0 <= ref2 ? m < ref2 : m > ref2; xPlus = 0 <= ref2 ? ++m : --m) {
+            for (yPlus = o = 0, ref3 = lumbaScale; 0 <= ref3 ? o < ref3 : o > ref3; yPlus = 0 <= ref3 ? ++o : --o) {
+              tempLandHash['' + (newX + xPlus) + '.' + (newY + yPlus)] = true;
+            }
           }
         }
+      }
+      parts[t] = [];
+      minX = this.MAP_X;
+      minY = this.MAP_Y;
+      for (key in tempLandHash) {
+        value = tempLandHash[key];
+        ref4 = key.split('.'), x = ref4[0], y = ref4[1];
+        x = Number(x);
+        y = Number(y);
+        if (x < minX) {
+          minX = x;
+        }
+        if (y < minY) {
+          minY = y;
+        }
+        parts[t].push([x, y]);
+      }
+      for (i = p = 0, ref5 = parts[t].length; 0 <= ref5 ? p < ref5 : p > ref5; i = 0 <= ref5 ? ++p : --p) {
+        parts[t][i] = [parts[t][i][0] - minX, parts[t][i][1] - minY];
+      }
+    }
+    console.log("part:" + (Utility.militime(true) - start) + " sec");
+    landHash = {};
+    landHash['' + Math.floor(this.MAP_X / 2) + '.' + Math.floor(this.MAP_Y / 2)] = true;
+    while (Utility.count(landHash) < landNum) {
+      ref6 = Utility.randPick(landHash), tempPosStr = ref6[0], _ = ref6[1];
+      ref7 = tempPosStr.split('.'), x = ref7[0], y = ref7[1];
+      ref8 = [Number(x), Number(y)], x = ref8[0], y = ref8[1];
+      newMapPosArray = (parts.shuffle())[0];
+      ref9 = (newMapPosArray.shuffle())[0], newX = ref9[0], newY = ref9[1];
+      isOver = false;
+      for (q = 0, len = newMapPosArray.length; q < len; q++) {
+        pos = newMapPosArray[q];
+        if (!((0 <= (ref10 = x + (pos[0] - newX)) && ref10 < this.MAP_X))) {
+          isOver = true;
+          break;
+        }
+        if (!((0 <= (ref11 = y + (pos[1] - newY)) && ref11 < this.MAP_Y))) {
+          isOver = true;
+          break;
+        }
+      }
+      if (isOver) {
+        continue;
+      }
+      for (r = 0, len1 = newMapPosArray.length; r < len1; r++) {
+        pos = newMapPosArray[r];
+        landHash['' + (x + (pos[0] - newX)) + '.' + (y + (pos[1] - newY))] = true;
       }
     }
     res = [];
     for (key in landHash) {
       value = landHash[key];
-      ref4 = key.split('.'), x = ref4[0], y = ref4[1];
+      ref12 = key.split('.'), x = ref12[0], y = ref12[1];
       res.push([Number(x), Number(y)]);
     }
+    console.log("genEnd:" + (Utility.militime(true) - start) + " sec");
     return res;
   };
 
@@ -193,8 +246,14 @@ Utility = (function() {
 
   Utility.generateArray = function(x, y, val) {
     var j, k, ref, ref1, res, xx, yAry, yy;
+    if (y == null) {
+      y = null;
+    }
     if (val == null) {
       val = null;
+    }
+    if (y === null) {
+      y = x;
     }
     res = [];
     yAry = [];
@@ -221,6 +280,20 @@ Utility = (function() {
 
   Utility.count = function(object) {
     return Object.keys(object).length;
+  };
+
+  Utility.randPick = function(object) {
+    var i, key, limit, value;
+    limit = this.rand(0, this.count(object) - 1);
+    i = 0;
+    for (key in object) {
+      value = object[key];
+      if (i === limit) {
+        return [key, value];
+      }
+      i++;
+    }
+    return false;
   };
 
   return Utility;

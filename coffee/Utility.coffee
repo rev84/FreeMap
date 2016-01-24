@@ -1,5 +1,6 @@
 class Utility
-  @generateArray:(x, y, val = null)->
+  @generateArray:(x, y = null, val = null)->
+    y = x if y is null
     res = []
     yAry = []
     for yy in [0...y]
@@ -17,6 +18,14 @@ class Utility
 
   @count:(object)->
     Object.keys(object).length
+
+  @randPick:(object)->
+    limit = @rand(0, @count(object)-1)
+    i = 0
+    for key, value of object
+      return [key, value] if i is limit
+      i++
+    false
 
 Array::shuffle = ()->
   n = @length
