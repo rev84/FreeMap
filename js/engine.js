@@ -14,27 +14,29 @@ Map = (function() {
 
   Map.TOWN_DISTANCE_MIN = 40;
 
-  Map.LAND_RATE = 0.02;
+  Map.LAND_RATE = 0.7;
 
   Map.towns = [];
 
   Map.init = function() {};
 
   Map.drawLand = function() {
-    var end, img, j, len, posAry, ref, start, x, y;
+    var end, j, len, posAry, ref, start, x, y;
     start = Utility.militime(true);
-    $('#map').css({
+    $('#land').attr({
       width: this.MAP_X + 'px',
       height: this.MAP_Y + 'px'
     });
     posAry = this.generateLand();
     for (j = 0, len = posAry.length; j < len; j++) {
       ref = posAry[j], x = ref[0], y = ref[1];
-      img = $('<img>').attr('src', './img/land.png').addClass('town').css({
-        left: '' + x + 'px',
-        top: '' + y + 'px'
+      $('#land').drawRect({
+        strokeStyle: '#7cfc00',
+        x: x,
+        y: y,
+        width: 1,
+        height: 1
       });
-      $('#map').append(img);
     }
     end = Utility.militime(true);
     return console.log("" + (end - start) + " sec");
@@ -61,24 +63,25 @@ Map = (function() {
   };
 
   Map.generateLand = function() {
-    var j, k, key, l, landHash, landNum, lu, lumba, lumbaScale, m, newX, newY, ref, ref1, ref2, ref3, res, t, value, x, xPlus, y, yPlus;
+    var j, k, key, l, landHash, landNum, lu, lumba, lumbaNum, lumbaScale, m, newX, newY, ref, ref1, ref2, ref3, ref4, res, t, value, x, xPlus, y, yPlus;
     landNum = Math.floor(this.MAP_X * this.MAP_Y * this.LAND_RATE);
-    lumbaScale = 3;
+    lumbaScale = 5;
+    lumbaNum = 100;
     landHash = {};
     lumba = [];
-    for (t = j = 0; j < 10; t = ++j) {
+    for (t = j = 0, ref = lumbaNum; 0 <= ref ? j < ref : j > ref; t = 0 <= ref ? ++j : --j) {
       lumba.push([Math.floor(this.MAP_X / 2), Math.floor(this.MAP_Y / 2)]);
     }
     while (Utility.count(landHash) < landNum) {
-      for (lu = k = 0, ref = lumba.length; 0 <= ref ? k < ref : k > ref; lu = 0 <= ref ? ++k : --k) {
+      for (lu = k = 0, ref1 = lumba.length; 0 <= ref1 ? k < ref1 : k > ref1; lu = 0 <= ref1 ? ++k : --k) {
         newX = lumba[lu][0] + Utility.rand(-1, 1);
         newY = lumba[lu][1] + Utility.rand(-1, 1);
         if (!((0 <= newX && newX < this.MAP_X - (lumbaScale - 1)) && (0 <= newY && newY < this.MAP_Y - (lumbaScale - 1)))) {
           continue;
         }
         lumba[lu] = [newX, newY];
-        for (xPlus = l = 0, ref1 = lumbaScale; 0 <= ref1 ? l < ref1 : l > ref1; xPlus = 0 <= ref1 ? ++l : --l) {
-          for (yPlus = m = 0, ref2 = lumbaScale; 0 <= ref2 ? m < ref2 : m > ref2; yPlus = 0 <= ref2 ? ++m : --m) {
+        for (xPlus = l = 0, ref2 = lumbaScale; 0 <= ref2 ? l < ref2 : l > ref2; xPlus = 0 <= ref2 ? ++l : --l) {
+          for (yPlus = m = 0, ref3 = lumbaScale; 0 <= ref3 ? m < ref3 : m > ref3; yPlus = 0 <= ref3 ? ++m : --m) {
             landHash['' + (newX + xPlus) + '.' + (newY + yPlus)] = true;
           }
         }
@@ -87,7 +90,7 @@ Map = (function() {
     res = [];
     for (key in landHash) {
       value = landHash[key];
-      ref3 = key.split('.'), x = ref3[0], y = ref3[1];
+      ref4 = key.split('.'), x = ref4[0], y = ref4[1];
       res.push([Number(x), Number(y)]);
     }
     return res;

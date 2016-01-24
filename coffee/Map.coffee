@@ -9,7 +9,7 @@ class Map
   @TOWN_DISTANCE_MIN = 40
 
   # 陸地面積の割合
-  @LAND_RATE = 0.02
+  @LAND_RATE = 0.7
 
 
   # 街
@@ -20,17 +20,20 @@ class Map
 
   @drawLand:->
     start = Utility.militime(true)
-    $('#map').css({
+    $('#land').attr({
       width : @MAP_X+'px'
       height : @MAP_Y+'px'
     })
     posAry = @generateLand()
     for [x, y] in posAry
-      img = $('<img>').attr('src', './img/land.png').addClass('town').css({
-        left: ''+x+'px'
-        top : ''+y+'px'
+      $('#land').drawRect({
+        strokeStyle : '#7cfc00'
+        x : x
+        y : y
+        width : 1
+        height : 1
       })
-      $('#map').append img
+      
     end = Utility.militime(true)
     console.log(""+(end - start)+" sec")
 
@@ -56,10 +59,11 @@ class Map
     landNum = Math.floor @MAP_X * @MAP_Y * @LAND_RATE
 
     # ルンバを10台走らせて指定面積になるまでやる
-    lumbaScale = 3 # ルンバの大きさ
+    lumbaScale = 5  # ルンバの大きさ
+    lumbaNum   = 100 # ルンバの数
     landHash = {}
     lumba = []
-    lumba.push [Math.floor(@MAP_X/2), Math.floor(@MAP_Y/2)] for t in [0...10]
+    lumba.push [Math.floor(@MAP_X/2), Math.floor(@MAP_Y/2)] for t in [0...lumbaNum]
     while Utility.count(landHash) < landNum
       for lu in [0...lumba.length]
         newX = lumba[lu][0] + Utility.rand(-1, 1)
